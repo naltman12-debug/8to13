@@ -1,0 +1,61 @@
+name: Update site
+
+on:
+  schedule:
+    # The free data source refreshes once each evening after the close.
+    # 02:00 UTC = 10 PM ET in summer, 9 PM ET in winter. Tuesday-Saturday UTC covers Monday-Friday trading days.
+    - cron: "0 2 * * 2-6"
+    # With a licensed intraday source, replace the line above with these three:
+    # - cron: "30 15 * * 1-5"   # 11:30 AM ET summer / 10:30 AM winter
+    # - cron: "45 17 * * 1-5"   # 1:45 PM ET summer / 12:45 PM winter
+    # - cron: "30 21 * * 1-5"   # 5:30 PM ET summer / 4:30 PM winter
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: "Rebuild five years of daily history first (one-time, takes about an hour)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Backfill daily history
+        if: ${{ inputs.backfill }}
+        run: python backfill.py
+      - name: Build site
+        run: python build.py
+      - name: Save history
+        run: |
+          git config user.name "8to13 bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/history.json
+          git diff --cached --quiet || git commit -m "Daily snapshot"
+          git push
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
