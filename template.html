@@ -1,0 +1,428 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>8 to 13 · US stocks by market cap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#ffffff;--ink:#101820;--muted:#5d6975;--line:#e3e8ec;--panel:#f6f8f9;--bar:#3d6fa8;--soft:#edf2f8;--up:#0a8a4b;--down:#c23b30;color-scheme:light dark}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 96px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1116;--ink:#e8edf1;--muted:#93a0ab;--line:#232c35;--panel:#131a21;--bar:#7fadde;--soft:#17202b;--up:#3dbd7d;--down:#ef6b5f}}
+:root[data-theme="dark"]{--bg:#0c1116;--ink:#e8edf1;--muted:#93a0ab;--line:#232c35;--panel:#131a21;--bar:#7fadde;--soft:#17202b;--up:#3dbd7d;--down:#ef6b5f}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5;font-size:16px}
+header.site{max-width:900px;margin:0 auto;padding:22px 18px 6px}
+.brand{font-weight:800;font-size:1.05rem;letter-spacing:-.01em}
+.brand small{font-weight:400;color:var(--muted);margin-left:8px;font-size:.85rem}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav.tabs .in{max-width:900px;margin:0 auto;display:flex;gap:2px;overflow-x:auto;padding:0 12px;scrollbar-width:none}
+nav.tabs .in::-webkit-scrollbar{display:none}
+nav.tabs a{flex:none;padding:12px 12px 10px;color:var(--muted);text-decoration:none;font-weight:500;font-size:.92rem;border-bottom:3px solid transparent;white-space:nowrap}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--bar);font-weight:700}
+nav.tabs a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,.rung:focus-visible{outline:2px solid var(--bar);outline-offset:2px}
+main{max-width:900px;margin:0 auto;padding:22px 18px 64px}
+h1{font-size:clamp(1.9rem,6vw,2.7rem);line-height:1.05;font-weight:800;letter-spacing:-.02em;margin:6px 0 10px}
+h2{font-size:1.2rem;font-weight:700;margin:40px 0 6px;letter-spacing:-.01em}
+p{margin:0 0 12px;max-width:68ch}.sub{color:var(--muted)}
+.rung{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;text-decoration:none;color:inherit}
+.rung:hover .fill{filter:brightness(1.15)}
+.rung .lab{font-weight:500;font-size:.92rem;white-space:nowrap}
+.track{position:relative;height:30px}
+.fill{height:100%;background:var(--bar);border-radius:0 4px 4px 0;min-width:3px;transform-origin:left;animation:grow .7s cubic-bezier(.2,.7,.2,1) both}
+.num{position:absolute;top:50%;transform:translateY(-50%);font-weight:700;font-variant-numeric:tabular-nums;font-size:.95rem;padding-left:8px;white-space:nowrap}
+.num em{font-style:normal;font-weight:400;color:var(--muted);font-size:.82rem;margin-left:6px}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){.fill{animation:none}}
+.wrap{overflow-x:auto;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.92rem}
+.sum{min-width:560px}
+th,td{text-align:right;padding:9px 8px;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left;white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:.84rem}
+td a{color:inherit;font-weight:700;text-decoration:none;border-bottom:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:16px}
+.stat{background:var(--bg);padding:14px 14px 12px}
+.stat .v{font-size:1.45rem;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums;line-height:1.15}
+.stat .k{color:var(--muted);font-size:.84rem;margin-top:2px}
+.hist{display:flex;align-items:flex-end;gap:6px;height:150px;margin-top:14px;border-bottom:1px solid var(--line)}
+.hist .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.hist .b{width:100%;background:var(--bar);border-radius:3px 3px 0 0;min-height:2px}
+.hist .c{font-size:.8rem;font-weight:700;margin-bottom:3px;font-variant-numeric:tabular-nums}
+.hx{display:flex;gap:6px;margin-top:5px}.hx div{flex:1;text-align:center;font-size:.74rem;color:var(--muted)}
+.srow{padding:10px 0 12px;border-bottom:1px solid var(--line)}
+.srow .head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.srow .head a{font-weight:700;color:inherit;text-decoration:none}
+.srow .head span{color:var(--muted);font-size:.85rem}
+.stack{display:flex;height:26px;border-radius:4px;overflow:hidden}
+.stack div{height:100%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;overflow:hidden;white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:.82rem}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i,.dot{width:11px;height:11px;border-radius:2px;display:inline-block;flex:none}
+.plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px 18px;margin-top:10px;font-size:.88rem}
+.plist button{display:flex;align-items:center;gap:8px;justify-content:space-between;background:none;border:0;padding:3px 0;color:inherit;font:inherit;cursor:pointer;text-align:left}
+.plist button span:first-child{display:flex;align-items:center;gap:8px}
+.plist button:hover span:first-child{text-decoration:underline}
+.plist button[aria-pressed="true"] span:first-child{font-weight:700;text-decoration:underline}
+.plist button b{font-variant-numeric:tabular-nums;font-weight:500;color:var(--muted)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.tools input,.tools select{font:inherit;font-size:.92rem;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
+.tools input{flex:1 1 220px}
+.cos{min-width:0}
+.cos th{white-space:nowrap}
+.cos th button{background:none;border:0;font:inherit;color:inherit;cursor:pointer;padding:0}
+.cos th button[data-dir]::after{content:attr(data-dir);margin-left:4px}
+.cos td.nm{text-align:left;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cos td.sc{text-align:left;color:var(--muted);white-space:nowrap}
+.cos td.sc .dot{margin-right:6px;vertical-align:-1px}
+.more{margin-top:14px;font:inherit;font-weight:700;padding:10px 16px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.count{color:var(--muted);font-size:.85rem;margin-top:10px}
+.nb{display:flex;justify-content:space-between;gap:12px;margin-top:40px;padding-top:14px;border-top:1px solid var(--line)}
+.nb a{color:inherit;font-weight:700;text-decoration:none}
+
+.st{min-width:560px}
+.st th button{background:none;border:0;font:inherit;color:inherit;cursor:pointer;padding:0;white-space:nowrap}
+.st th[aria-sort="ascending"],.st th[aria-sort="descending"]{color:var(--ink);font-weight:700}
+.st td:first-child,.st th:first-child{position:sticky;left:0;background:var(--bg);z-index:1}
+.st tr.sel td{background:var(--soft)}
+.st td.z{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.chips a{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border:1px solid var(--line);border-radius:999px;color:inherit;text-decoration:none;font-size:.88rem;background:var(--panel)}
+.chips a[aria-current="true"]{border-color:var(--ink);font-weight:700;box-shadow:inset 0 0 0 1px var(--ink)}
+.back{display:inline-block;margin-top:10px;color:var(--muted);font-size:.88rem}
+
+header.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+header.bar .in{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px}
+header.bar .brand{font-family:"Bodoni Moda","Didot","Bodoni 72",Georgia,serif;font-weight:700;font-size:1.3rem;letter-spacing:-.01em;color:var(--bar);text-decoration:none;white-space:nowrap}
+header.bar select,.pick select{font:inherit;font-size:.92rem;padding:8px 32px 8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);max-width:62vw}
+header.bar .asof{max-width:900px;margin:-4px auto 0;padding:0 18px 8px;color:var(--muted);font-size:.8rem}
+body.home header.bar{display:none}
+.hero{max-width:680px;margin:0 auto;padding:6vh 0 28px;text-align:center}
+.name{font-family:"Bodoni Moda","Didot","Bodoni 72",Georgia,serif;font-size:clamp(3.6rem,16vw,6.6rem);font-weight:700;letter-spacing:-.02em;line-height:.95;margin:0 0 10px;color:var(--ink)}
+.stamp{color:var(--muted);font-size:.85rem;margin:0 auto 30px}
+.digits{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;align-items:end;margin:0 0 10px}
+.digits a{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:inherit;padding:6px 0 8px;border-radius:8px}
+.digits a:hover{background:var(--soft)}
+.digits .bar{width:68%;background:var(--bar);border-radius:3px 3px 0 0;min-height:3px;margin-bottom:8px}
+.digits .dg{font-size:clamp(.95rem,4.3vw,1.9rem);font-weight:800;letter-spacing:-.02em;line-height:1}
+.digits .dl{color:var(--muted);font-size:.7rem;line-height:1.25;margin-top:3px}
+.digits .dc{font-weight:700;font-size:.9rem;font-variant-numeric:tabular-nums;margin-top:6px}
+.digits .dv{color:var(--bar);font-weight:600;font-size:.78rem;font-variant-numeric:tabular-nums;margin-top:1px}
+.digcap{color:var(--muted);font-size:.8rem;margin:0 auto 26px}
+.pick{display:flex;flex-wrap:wrap;gap:12px;text-align:left}
+.pick label{display:flex;flex-direction:column;gap:5px;font-weight:600;font-size:.85rem;flex:1 1 200px}
+.pick select{max-width:none;width:100%;padding:12px;font-size:1rem;font-weight:500;border-radius:8px}
+.navs{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:18px 0 34px}
+.navs a{padding:9px 16px;border:1px solid var(--bar);border-radius:999px;color:var(--bar);font-weight:700;font-size:.9rem;text-decoration:none}
+.navs a:hover{background:var(--bar);color:var(--bg)}
+.navs a:focus-visible{outline:2px solid var(--bar);outline-offset:2px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:26px;text-align:left}
+.facts div{border-top:2px solid var(--bar);padding-top:8px;font-size:.92rem}
+.facts b{display:block;font-size:1.4rem;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.tag{color:var(--muted);font-size:.85rem;max-width:52ch;margin:0 auto}
+.dtag{display:inline-block;font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:2px}
+.rung .lab b{display:inline-block;width:24px;font-weight:800}
+
+.up{color:var(--up)}.down{color:var(--down)}
+.chart{width:100%;height:auto;display:block;margin-top:14px;overflow:visible}
+.chart text{font-family:inherit;font-size:12px;fill:var(--muted)}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .ln{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.lgd{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:.84rem}
+.lgd span{display:inline-flex;align-items:center;gap:6px}.lgd i{width:14px;height:3px;border-radius:2px;display:inline-block}
+.minis{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:14px}
+.mini{background:var(--bg);padding:14px}
+.mini .t{font-weight:700;font-size:.92rem;color:inherit;text-decoration:none}
+.mini .r{display:flex;align-items:baseline;gap:8px;margin-top:4px;font-variant-numeric:tabular-nums}
+.mini .r b{font-size:1.35rem;font-weight:800}
+.mini .r span{font-size:.85rem;color:var(--muted)}
+.mini svg{width:100%;height:46px;display:block;margin-top:8px}
+
+.secbtn{display:inline-flex;align-items:center;gap:8px;background:none;border:0;padding:0;font:inherit;font-weight:600;color:var(--bar);cursor:pointer;text-align:left;white-space:nowrap}
+.secbtn:hover{text-decoration:underline}
+.secsum{border:1px solid var(--line);border-left:4px solid var(--bar);border-radius:6px;padding:12px 14px;margin:10px 0 4px;background:var(--panel)}
+.secsum .sh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.secsum .clr{margin-left:auto;background:none;border:0;font:inherit;font-size:.85rem;color:var(--bar);cursor:pointer;text-decoration:underline;padding:0}
+.secsum .sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:8px;font-size:.88rem;color:var(--muted)}
+.secsum .sg b{display:block;color:var(--ink);font-size:1.15rem;font-variant-numeric:tabular-nums}
+
+.hfilter{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 18px}
+.hfilter label{font-weight:600;font-size:.9rem}
+.hfilter select{font:inherit;font-size:1rem;padding:10px 34px 10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);min-width:220px}
+.hfilter select:focus-visible{outline:2px solid var(--bar);outline-offset:2px}
+.digits .bar{transition:height .35s ease,background-color .35s ease}
+.digits a.empty{opacity:.45}
+@media (prefers-reduced-motion:reduce){.digits .bar{transition:none}}
+.foot{border-top:1px solid var(--line);padding:18px 0 calc(18px + env(safe-area-inset-bottom,0px))}.foot .in{max-width:900px;margin:0 auto;padding:0 18px;display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:.82rem}.foot a{color:var(--muted)}
+.notes{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:.88rem;color:var(--muted)}
+.notes p{max-width:72ch}
+@media (max-width:600px){.cos .ex{display:none}.cos td.sc .t{display:none}.cos th.sch{font-size:0}.cos th.sch button{font-size:.84rem}.cos td.nm{white-space:normal;max-width:none;line-height:1.3}}
+@media (max-width:600px){.secbtn{white-space:normal;align-items:flex-start;line-height:1.3}.secbtn .dot{margin-top:4px}.st th button{white-space:normal;text-align:right}.swipe{display:block}}
+.swipe{display:none;color:var(--muted);font-size:.78rem;margin-top:6px}
+</style></head><body>
+<header class="bar"><div class="in"><a class="brand" href="#home">8 to 13</a><select id="jump" aria-label="Jump to a page"></select></div><div class="asof" id="asof"></div></header>
+<main id="view"></main>
+<footer class="foot"><div class="in"><span>Not investment advice. Do your own research.</span><a href="privacy.html">Privacy</a></div></footer>
+<script>
+const DATA=__DATA__, D=DATA.bands, HIST=DATA.hist, ASOF=DATA.asof;
+const COLORS={"Technology":"#2b5c9e","Health Care":"#2e8b7a","Finance":"#55703f","Consumer Discretionary":"#b5543c","Industrials":"#8a7350","Real Estate":"#c08a2e","Energy":"#424b55","Utilities":"#79a052","Consumer Staples":"#8b5d86","Telecommunications":"#3c8fb0","Basic Materials":"#8c99a5","Other":"#bcc4cc"};
+const col=s=>COLORS[s]||"#999";
+const fmt=m=>m>=1e6?"$"+(m/1e6).toFixed(2)+"T":m>=1e5?"$"+Math.round(m/1e3)+"B":m>=1e3?"$"+(m/1e3).toFixed(1)+"B":"$"+(m>=100?Math.round(m):m.toFixed(1))+"M";
+const fmt3=m=>m>=1e6?"$"+(m/1e6).toPrecision(3)+"T":m>=1e3?"$"+(m/1e3).toPrecision(3)+"B":"$"+m.toPrecision(3)+"M";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const TOTAL=D.reduce((a,b)=>a+b.n,0);
+D.forEach((d,i)=>d.digits=13-i);
+document.getElementById("asof").textContent="Prices as of "+ASOF;
+const JUMP=[["home","Home"],["overview","Overview"],["sectors","Sectors"],["history","5-year view"]].concat(D.map(d=>[d.id,d.band]));
+const J=document.getElementById("jump");
+J.innerHTML=JUMP.map(([id,l])=>`<option value="${id}">${l}</option>`).join("");
+J.onchange=()=>{location.hash=J.value;};
+const V=document.getElementById("view");
+const legend=keys=>`<div class="legend">${Object.keys(COLORS).filter(k=>keys.has(k)).map(k=>`<span><i style="background:${col(k)}"></i>${k}</span>`).join("")}</div>`;
+const stack=d=>{const e=Object.entries(d.sectors).sort((a,b)=>b[1]-a[1]);return `<div class="stack" role="img" aria-label="${d.band} sector mix: ${e.map(x=>x[0]+" "+x[1]+"%").join(", ")}">${e.map(([k,v])=>`<div title="${k} ${v}%" style="width:${v}%;background:${col(k)}">${v>=9?Math.round(v)+"%":""}</div>`).join("")}</div>`;};
+
+const ALL=D.flatMap((d,bi)=>d.cos.map(c=>({m:c[2],s:c[3],bi})));
+const TOTALVAL=ALL.reduce((a,c)=>a+c.m,0);
+const SECTORS=Object.keys(COLORS).filter(s=>ALL.some(c=>c.s===s));
+const med=a=>{const s=a.slice().sort((x,y)=>x-y),n=s.length;return n?(n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2):0;};
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+const SHORT=["$1T+","$100B–1T","$10B–100B","$1B–10B","$100M–1B","$10M–100M"];
+const dash='<span class="z">—</span>';
+// Spreadsheet-style table: click any header to sort, click again to flip
+function sortable(el,cols,data,opt={}){
+  let k=opt.k||cols[0].k, dir=opt.dir||-1;
+  const val=(row,c)=>c.sort?c.sort(row):row[c.k];
+  function draw(){
+    const c0=cols.find(c=>c.k===k);
+    const r=data.slice().sort((a,b)=>{const x=val(a,c0),y=val(b,c0);return (typeof x==="string"?x.localeCompare(y):x-y)*dir;});
+    const al=c=>c.left?' style="text-align:left"':'';
+    el.innerHTML=`<thead><tr>${cols.map(c=>`<th${al(c)} aria-sort="${c.k===k?(dir<0?"descending":"ascending"):"none"}"><button data-k="${c.k}">${c.label}${c.k===k?(dir<0?" ↓":" ↑"):""}</button></th>`).join("")}</tr></thead>
+    <tbody>${r.map(row=>`<tr${opt.sel&&opt.sel(row)?' class="sel"':''}>${cols.map(c=>`<td${al(c)}>${c.fmt?c.fmt(row[c.k],row):row[c.k]}</td>`).join("")}</tr>`).join("")}</tbody>`;
+    el.querySelectorAll("th button").forEach(b=>b.onclick=()=>{const nk=b.dataset.k,c=cols.find(x=>x.k===nk);if(nk===k)dir=-dir;else{k=nk;dir=typeof val(data[0],c)==="string"?1:-1;}draw();});
+  }
+  draw();
+}
+const nOrDash=v=>v?v.toLocaleString():dash;
+const capOrDash=v=>v?fmt(v):dash;
+const ratioOrDash=v=>v>0?v.toFixed(2)+"×":dash;
+
+function sectorsView(sel){
+  const rows=SECTORS.map(s=>{const cs=ALL.filter(c=>c.s===s),m=cs.map(c=>c.m),md=med(m),mn=avg(m);
+    const v=m.reduce((a,b)=>a+b,0);const r={sector:s,n:cs.length,median:md,mean:mn,ratio:md?mn/md:0,val:v,pv:v/TOTALVAL};D.forEach((d,i)=>r["b"+i]=cs.filter(c=>c.bi===i).length);return r;});
+  const valid=sel&&SECTORS.includes(sel);
+  let detail="";
+  if(valid){
+    const cs=ALL.filter(c=>c.s===sel), tot=cs.length;
+    const br=D.map((d,i)=>{const m=cs.filter(c=>c.bi===i).map(c=>c.m),md=med(m),mn=avg(m);return{band:d.band,id:d.id,ord:i,n:m.length,ps:tot?m.length/tot:0,pb:m.length/d.n,median:md,mean:mn,ratio:md?mn/md:0,total:m.reduce((a,b)=>a+b,0)};});
+    const mx=Math.max(...br.map(b=>b.n),1);
+    detail=`<h2 style="display:flex;align-items:center;gap:10px"><i class="dot" style="background:${col(sel)};width:14px;height:14px"></i>${sel}</h2>
+    <p class="sub">${tot.toLocaleString()} companies worth ${fmt(cs.reduce((a,c)=>a+c.m,0))} combined, ${(100*cs.reduce((a,c)=>a+c.m,0)/TOTALVAL).toFixed(1)}% of all value tracked. Median ${fmt(med(cs.map(c=>c.m)))}, mean ${fmt(avg(cs.map(c=>c.m)))}. Tap a band to see its ${sel} companies.</p>
+    <div>${br.map((b,i)=>{const w=Math.max(b.n?.4:0,100*b.n/mx)*.58;return `<a class="rung" href="#${b.id}/${encodeURIComponent(sel)}"><div class="lab">${b.band}</div><div class="track"><div class="fill" style="width:${w}%;background:${col(sel)};animation-delay:${i*60}ms"></div><span class="num" style="left:${w}%">${b.n.toLocaleString()}<em>${(100*b.ps).toFixed(1)}% of sector</em></span></div></a>`;}).join("")}</div>
+    <h2>${sel} by band</h2><p class="sub">Tap any column header to sort. "Share of band" is how much of that band this sector makes up.</p>
+    <div class="wrap"><table class="st" id="sdet"></table></div>
+    <a class="back" href="#sectors">Clear selection</a>`;
+    setTimeout(()=>sortable(document.getElementById("sdet"),[
+      {k:"band",label:"Band",left:1,sort:r=>r.ord,fmt:(v,r)=>`<a href="#${r.id}/${encodeURIComponent(sel)}">${v}</a>`},
+      {k:"n",label:"Companies",fmt:nOrDash},{k:"ps",label:"Share of sector",fmt:v=>v?(100*v).toFixed(1)+"%":dash},
+      {k:"pb",label:"Share of band",fmt:v=>v?(100*v).toFixed(1)+"%":dash},
+      {k:"median",label:"Median",fmt:capOrDash},{k:"mean",label:"Mean",fmt:capOrDash},
+      {k:"ratio",label:"Mean ÷ median",fmt:ratioOrDash},{k:"total",label:"Combined value",fmt:capOrDash}],br,{k:"band",dir:1}));
+  }
+  V.innerHTML=`<h1>Sectors across the ladder</h1>
+  <p class="sub">Pick a sector to see how its companies spread across the 10× bands, with the count, median, mean and mean ÷ median in each.</p>
+  <div class="chips">${SECTORS.map(s=>`<a href="#sectors/${encodeURIComponent(s)}" aria-current="${s===sel}"><i class="dot" style="background:${col(s)}"></i>${s}</a>`).join("")}</div>
+  ${detail}
+  <h2>All sectors</h2><p class="sub">Company counts per band, plus each sector’s combined value across every band from $10M to $1T+. Tap any column header to sort, tap a sector name to open it.</p>
+  <div class="wrap"><table class="st" id="sall"></table></div><p class="swipe">Swipe the table sideways for every band and the value columns.</p>`;
+  sortable(document.getElementById("sall"),[
+    {k:"sector",label:"Sector",left:1,fmt:v=>`<a href="#sectors/${encodeURIComponent(v)}"><i class="dot" style="background:${col(v)};margin-right:6px;vertical-align:-1px"></i>${v}</a>`},
+    {k:"n",label:"Total",fmt:v=>v.toLocaleString()},
+    ...D.map((d,i)=>({k:"b"+i,label:SHORT[i],fmt:nOrDash})),
+    {k:"val",label:"Combined value",fmt:v=>fmt(v)},{k:"pv",label:"% of all value",fmt:v=>(100*v).toFixed(1)+"%"},
+    {k:"median",label:"Median",fmt:capOrDash},{k:"mean",label:"Mean",fmt:capOrDash},{k:"ratio",label:"Mean ÷ median",fmt:ratioOrDash}],rows,{k:"n",dir:-1,sel:r=>r.sector===sel});
+}
+
+function home(sel){
+  if(!SECTORS.includes(sel)) sel="";
+  const asc=D.slice().reverse(), t1=D[0], big=D.reduce((a,b)=>b.n>a.n?b:a);
+  V.innerHTML=`<section class="hero">
+  <h1 class="name">8 to 13</h1>
+  <p class="stamp">Prices as of ${ASOF}</p>
+  <div class="hfilter"><label for="hs">Sector</label><select id="hs"><option value="">All sectors</option>${SECTORS.map(s=>`<option${s===sel?" selected":""}>${s}</option>`).join("")}</select></div>
+  <div class="digits" id="hchart"></div>
+  <p class="digcap" id="hcap"></p>
+  <div class="navs"><a href="#overview">Full overview</a><a href="#sectors">Sectors</a><a href="#history">5-year view</a></div>
+  <div class="facts">
+   <div><b>${TOTAL.toLocaleString()}</b>US companies tracked</div>
+   <div><b>${pct(t1.share)}</b>of the total value sits with the ${t1.n} companies worth $1T or more</div>
+   <div><b>${big.band}</b>is the most common size, with ${big.n.toLocaleString()} companies</div>
+  </div>
+  <p class="tag">US-listed companies grouped by market cap, from $10M to over $1T, with sector breakdowns. A starting point for research, not investment advice.</p>
+  </section>`;
+  const draw=s=>{
+    const vals=asc.map(d=>{const m=s?d.cos.filter(c=>c[3]===s).map(c=>c[2]):null;return{d,n:s?m.length:d.n,v:s?m.reduce((a,b)=>a+b,0):d.total/1e6};});
+    const mx=Math.max(1,...vals.map(x=>x.n));
+    const C=document.getElementById("hchart");
+    if(!C.children.length) C.innerHTML=vals.map(()=>`<a><div class="bar"></div><span class="dg"></span><span class="dl"></span><span class="dc"></span><span class="dv"></span></a>`).join("");
+    vals.forEach((x,i)=>{const a=C.children[i],d=x.d;
+      a.href="#"+d.id+(s?"/"+encodeURIComponent(s):"");
+      a.setAttribute("aria-label",`${d.band}${s?", "+s:""}: ${x.n} companies worth ${fmt(x.v)} combined`);
+      a.classList.toggle("empty",!x.n);
+      a.querySelector(".bar").style.height=Math.max(3,76*x.n/mx)+"px";
+      if(s) a.querySelector(".bar").style.background=col(s); else a.querySelector(".bar").style.background="";
+      a.querySelector(".dg").textContent=d.band.split("–")[0].replace("+","");
+      a.querySelector(".dl").textContent=d.band.includes("–")?"to "+d.band.split("–")[1]:"and up";
+      a.querySelector(".dc").textContent=x.n.toLocaleString();
+      a.querySelector(".dv").textContent=x.n?fmt3(x.v):"—";});
+    const tn=vals.reduce((a,x)=>a+x.n,0), tv=vals.reduce((a,x)=>a+x.v,0);
+    document.getElementById("hcap").textContent=s?`${s}: ${tn.toLocaleString()} companies worth ${fmt(tv)} combined. Tap a band to see them.`:"Number of companies and their combined value in each band. Tap a band to explore it.";
+  };
+  draw(sel);
+  document.getElementById("hs").onchange=e=>{const s=e.target.value;history.replaceState(null,"","#home"+(s?"/"+encodeURIComponent(s):""));draw(s);};
+}
+
+const BCOL=[(matchMedia("(prefers-color-scheme: dark)").matches&&document.documentElement.dataset.theme!=="light")||document.documentElement.dataset.theme==="dark"?"#b9d3f2":"#1b2f4b","#1f8f63","#2b5c9e","#c08a2e","#8b5d86","#8c99a5"];
+const dlong=s=>new Date(s+"T12:00:00").toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+const dshort=s=>new Date(s+"T12:00:00").toLocaleDateString("en-US",{month:"short",year:"numeric"});
+const sgn=(v,f)=>`<span class="${v>0?"up":v<0?"down":""}">${v>0?"+":v<0?"−":""}${f(Math.abs(v))}</span>`;
+function lineChart(series,{max,ticks,fmtY}){
+  const W=Math.max(340,Math.min(760,(V.clientWidth||640)-36)),Hh=Math.round(W*.5)+40,L=40,R=14,T=10,B=26,n=HIST.length,TS=HIST.map(p=>Date.parse(p.date+"T12:00:00Z")),t0=TS[0],t1=TS[n-1],x=i=>L+(W-L-R)*(TS[i]-t0)/((t1-t0)||1),y=v=>T+(Hh-T-B)*(1-v/max);
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${series.map(z=>z.name+" from "+fmtY(z.v[0])+" to "+fmtY(z.v[n-1])).join("; ")}">`;
+  ticks.forEach(t=>{s+=`<line class="grid" x1="${L}" x2="${W-R}" y1="${y(t)}" y2="${y(t)}"/><text x="${L-6}" y="${y(t)+4}" text-anchor="end">${fmtY(t)}</text>`;});
+  for(let yr=new Date(t0).getUTCFullYear()+1;yr<=new Date(t1).getUTCFullYear();yr++){const tx=L+(W-L-R)*(Date.UTC(yr,0,1)-t0)/((t1-t0)||1);s+=`<line class="grid" x1="${tx}" x2="${tx}" y1="${T}" y2="${Hh-B}" stroke-dasharray="2 3"/><text x="${tx}" y="${Hh-6}" text-anchor="middle">${yr}</text>`;}
+  series.forEach(z=>{s+=`<polyline class="ln" stroke="${z.c}" points="${z.v.map((v,i)=>x(i)+","+y(v)).join(" ")}"/>`;
+    z.v.forEach((v,i)=>{s+=`<circle cx="${x(i)}" cy="${y(v)}" r="7" fill="transparent"><title>${z.name}, ${dlong(HIST[i].date)}: ${fmtY(v)}</title></circle>`;});});
+  return s+"</svg>";
+}
+function spark(v,c){const W=240,Hh=46,mn=Math.min(...v),mx=Math.max(...v),r=mx-mn||1;
+  return `<svg viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="${c}" stroke-width="2" vector-effect="non-scaling-stroke" points="${v.map((a,i)=>(W*i/(v.length-1))+","+(4+(Hh-8)*(1-(a-mn)/r))).join(" ")}"/></svg>`;}
+function historyView(){
+  const f=HIST[0], l=HIST[HIST.length-1];
+  const shareMax=Math.ceil(Math.max(...HIST.flatMap(p=>p.share))*10)/10;
+  V.innerHTML=`<h1>Five years of market caps</h1>
+  <p class="sub">How the size and shape of the US market changed from ${dlong(f.date)} to ${dlong(l.date)}. Each point counts the companies that were listed on that date.</p>
+  <div class="stats">
+   <div class="stat"><div class="v">${fmt(f.total)}</div><div class="k">Combined value, ${dshort(f.date)}</div></div>
+   <div class="stat"><div class="v">${fmt(l.total)}</div><div class="k">Combined value, ${dshort(l.date)}</div></div>
+   <div class="stat"><div class="v">${sgn(l.total/f.total-1,v=>(100*v).toFixed(1)+"%")}</div><div class="k">Change in combined value</div></div>
+   <div class="stat"><div class="v">${f.n.reduce((a,b)=>a+b,0).toLocaleString()} → ${l.n.reduce((a,b)=>a+b,0).toLocaleString()}</div><div class="k">Companies worth $10M or more</div></div>
+  </div>
+  <h2>Share of total value by band</h2><p class="sub">Each line is one band's slice of the combined market value. Hover or tap a point for the exact figure.</p>
+  ${lineChart(D.map((d,i)=>({name:d.band,c:BCOL[i],v:HIST.map(p=>p.share[i])})),{max:shareMax,ticks:[...Array(Math.round(shareMax*10)+1)].map((_,k)=>k/10),fmtY:v=>(100*v).toFixed(v<.01&&v>0?2:0)+"%"})}
+  <div class="lgd">${D.map((d,i)=>`<span><i style="background:${BCOL[i]}"></i>${d.band}</span>`).join("")}</div>
+  <h2>Companies in each band</h2><p class="sub">Number of companies in the band, ${dshort(f.date)} to ${dshort(l.date)}.</p>
+  <div class="minis">${D.map((d,i)=>{const v=HIST.map(p=>p.n[i]),a=v[0],b=v[v.length-1];return `<div class="mini"><a class="t" href="#${d.id}">${d.band}</a><div class="r"><b>${b.toLocaleString()}</b><span>from ${a.toLocaleString()}</span>${sgn(b-a,x=>x.toLocaleString())}</div>${spark(v,BCOL[i])}</div>`;}).join("")}</div>
+  <h2>Then vs. now</h2><p class="sub">${dlong(f.date)} compared with ${dlong(l.date)}. Tap any column header to sort.</p>
+  <div class="wrap"><table class="st" id="hcmp"></table></div>
+  <div class="notes"><p>The site saves a snapshot after every trading day. This page always covers the most recent five years, so the starting date moves forward as new days are added. The chart shows one point per month plus the latest day.</p>
+  <p>Each snapshot uses the same rules as the rest of the site: US-based operating companies only, no SPACs, funds, preferred shares or foreign ADRs. Nasdaq changed its sector labels during this period, so sectors aren't compared over time.</p></div>`;
+  const rows=D.map((d,i)=>({band:d.band,id:d.id,ord:i,n0:f.n[i],n1:l.n[i],dn:f.n[i]?l.n[i]/f.n[i]-1:0,s0:f.share[i],s1:l.share[i],ds:l.share[i]-f.share[i],m0:f.median[i],m1:l.median[i]}));
+  sortable(document.getElementById("hcmp"),[
+    {k:"band",label:"Band",left:1,sort:r=>r.ord,fmt:(v,r)=>`<a href="#${r.id}">${v}</a>`},
+    {k:"n0",label:"Companies then",fmt:v=>v.toLocaleString()},{k:"n1",label:"Companies now",fmt:v=>v.toLocaleString()},
+    {k:"dn",label:"Change",fmt:v=>sgn(v,x=>(100*x).toFixed(0)+"%")},
+    {k:"s0",label:"Share then",fmt:v=>pct(v)},{k:"s1",label:"Share now",fmt:v=>pct(v)},
+    {k:"ds",label:"Change (pts)",fmt:v=>sgn(100*v,x=>x.toFixed(1))},
+    {k:"m0",label:"Median then",fmt:v=>fmt(v)},{k:"m1",label:"Median now",fmt:v=>fmt(v)}],rows,{k:"band",dir:1});
+}
+
+function overview(){
+  const max=Math.max(...D.map(d=>d.n)), keys=new Set();D.forEach(d=>Object.keys(d.sectors).forEach(k=>keys.add(k)));
+  V.innerHTML=`<h1>US stocks, sorted by size</h1>
+  <p class="sub">${TOTAL.toLocaleString()} US-headquartered companies on the NYSE, Nasdaq and NYSE American, grouped into 10× market-cap bands. Pick a band to see every company in it.</p>
+  <h2>Companies in each band</h2><p class="sub">Bar length is the number of companies. The percentage is that band's share of the combined market value of all ${TOTAL.toLocaleString()}.</p>
+  <div id="ladder"></div>
+  <h2>Median vs. mean market cap</h2><p class="sub">When the mean runs well ahead of the median, a few big names at the top of the band are pulling the average up.</p>
+  <p class="sub" style="margin-top:-6px">Tap any column header to sort.</p><div class="wrap"><table class="st" id="osum"></table></div>
+  <h2>What each band is made of</h2><p class="sub">Share of companies in each band by sector.</p>${legend(keys)}
+  <div>${D.map(d=>`<div class="srow"><div class="head"><a href="#${d.id}">${d.band}</a><span>${d.n.toLocaleString()} companies</span></div>${stack(d)}</div>`).join("")}</div>
+  <div class="notes">
+  <p><b>What's included.</b> Operating companies listed as US-based, worth at least $10M. Excluded: SPACs, closed-end funds, preferred shares, warrants, units, notes and foreign ADRs (so TSMC, ASML and SK hynix are out). Companies with several share classes, like Alphabet and Berkshire, are counted once.</p>
+  <p><b>Sector labels are Nasdaq's, and some are odd.</b> Visa and Walmart are tagged Consumer Discretionary, Tesla is tagged Industrials. Berkshire Hathaway had no label and was set to Finance. Treat the sector mix as directional.</p>
+  <p><b>Counts move daily.</b> Companies near a band edge cross back and forth as prices change.</p>
+  <p>Not investment advice. Source: Nasdaq stock screener data as mirrored in the public US-Stock-Symbols dataset on GitHub.</p></div>`;
+  sortable(document.getElementById("osum"),[
+    {k:"band",label:"Band",left:1,sort:r=>D.indexOf(r),fmt:(v,r)=>`<a href="#${r.id}">${v}</a>`},
+    {k:"n",label:"Companies",fmt:v=>v.toLocaleString()},{k:"median",label:"Median",fmt:v=>fmt(v/1e6)},{k:"mean",label:"Mean",fmt:v=>fmt(v/1e6)},
+    {k:"ratio",label:"Mean ÷ median",fmt:v=>v.toFixed(2)+"×"},{k:"share",label:"Share of value",fmt:v=>pct(v)}],D.map(d=>Object.assign(d,{ratio:d.mean/d.median})),{k:"band",dir:1});
+  const L=document.getElementById("ladder");
+  D.forEach((d,i)=>{const w=Math.max(.4,100*d.n/max)*.62;L.insertAdjacentHTML("beforeend",`<a class="rung" href="#${d.id}"><div class="lab">${d.band}</div><div class="track"><div class="fill" style="width:${w}%;animation-delay:${i*70}ms"></div><span class="num" style="left:${w}%">${d.n.toLocaleString()}<em>${pct(d.share)}</em></span></div></a>`);});
+}
+const pct=s=>s>=.1?(100*s).toFixed(1)+"%":s>=.001?(100*s).toFixed(2)+"%":"<0.1%";
+
+let state={};
+function band(d,presetSec){
+  const i=D.indexOf(d), up=D[i-1], down=D[i+1];
+  const cos=d.cos, max=cos[0][2], min=cos[cos.length-1][2];
+  // histogram: 5 log bins across the band
+  const lo=d.lo/1e6, hi=d.id==="t1"?Math.max(max*1.01,lo*10):d.hi/1e6, bins=5, edges=[...Array(bins+1)].map((_,k)=>lo*Math.pow(hi/lo,k/bins));
+  const counts=Array(bins).fill(0);cos.forEach(c=>{let k=Math.min(bins-1,Math.floor(Math.log(c[2]/lo)/Math.log(hi/lo)*bins));counts[Math.max(0,k)]++;});
+  const hmax=Math.max(...counts);
+  const secs=Object.entries(d.sectors).sort((a,b)=>b[1]-a[1]);
+  V.innerHTML=`<h1>${d.band}</h1>
+  <p class="sub">${d.n.toLocaleString()} companies, ${(100*d.n/TOTAL).toFixed(1)}% of all US listings tracked here, holding ${pct(d.share)} of the combined market value.</p>
+  <div class="stats">
+   <div class="stat"><div class="v">${d.n.toLocaleString()}</div><div class="k">Companies</div></div>
+   <div class="stat"><div class="v">${fmt(d.median/1e6)}</div><div class="k">Median market cap</div></div>
+   <div class="stat"><div class="v">${fmt(d.mean/1e6)}</div><div class="k">Mean market cap</div></div>
+   <div class="stat"><div class="v">${(d.mean/d.median).toFixed(2)}×</div><div class="k">Mean ÷ median</div></div>
+   <div class="stat"><div class="v">${fmt(d.total/1e6)}</div><div class="k">Combined value</div></div>
+   <div class="stat"><div class="v">${pct(d.share)}</div><div class="k">Share of all value</div></div>
+  </div>
+  <h2>Where companies sit inside the band</h2><p class="sub">Each column covers an equal step on a log scale, from ${fmt(edges[0])} to ${fmt(edges[bins])}.</p>
+  <div class="hist" role="img" aria-label="Distribution: ${counts.map((c,k)=>fmt(edges[k])+" to "+fmt(edges[k+1])+": "+c).join(", ")}">${counts.map(c=>`<div class="col"><div class="c">${c}</div><div class="b" style="height:${hmax?Math.max(1.5,100*c/hmax*.82):0}%"></div></div>`).join("")}</div>
+  <div class="hx">${counts.map((c,k)=>`<div>${fmt(edges[k])}–${fmt(edges[k+1])}</div>`).join("")}</div>
+  <h2>Sector mix</h2><p class="sub">The bar shows each sector's share of companies in this band. In the table, tap a sector to filter the company list, or tap a column header to sort.</p>
+  ${stack(d)}
+  <div class="wrap"><table class="st" id="bsec"></table></div><p class="swipe">Swipe the table sideways for value and median.</p>
+  <h2 id="list">Every company in this band</h2>
+  <div class="secsum" id="secsum" hidden></div>
+  <div class="tools"><input id="q" type="search" placeholder="Search ticker or name" aria-label="Search ticker or name">
+  <select id="sf" aria-label="Filter by sector"><option value="">All sectors</option>${secs.map(([k])=>`<option>${esc(k)}</option>`).join("")}</select></div>
+  <div class="wrap"><table class="cos"><thead><tr><th><button data-k="0">Ticker</button></th><th style="text-align:left"><button data-k="1">Company</button></th><th><button data-k="2" data-dir="↓">Market cap</button></th><th class="sch" style="text-align:left"><button data-k="3">Sector</button></th><th class="ex"><button data-k="4">Exchange</button></th></tr></thead><tbody id="rows"></tbody></table></div>
+  <div class="count" id="cnt"></div><button class="more" id="more" hidden>Show 100 more</button>
+  <div class="nb"><span>${up?`<a href="#${up.id}">↑ ${up.band}</a>`:""}</span><span>${down?`<a href="#${down.id}">${down.band} ↓</a>`:""}</span></div>`;
+  state={d,q:"",sec:SECTORS.includes(presetSec)&&d.sectors[presetSec]?presetSec:"",k:2,dir:-1,shown:100};
+  document.getElementById("sf").value=state.sec;
+  document.getElementById("q").oninput=e=>{state.q=e.target.value.trim().toLowerCase();state.shown=100;rows();};
+  document.getElementById("sf").onchange=e=>{state.sec=e.target.value;state.shown=100;rows();};
+  document.getElementById("more").onclick=()=>{state.shown+=100;rows();};
+  const bandVal=d.total/1e6;
+  const sr=secs.map(([k])=>{const m=d.cos.filter(c=>c[3]===k).map(c=>c[2]),v=m.reduce((a,b)=>a+b,0);return{sector:k,n:m.length,pc:m.length/d.n,val:v,pv:v/bandVal,median:med(m)};});
+  state.sr=sr;
+  const bs=document.getElementById("bsec");
+  new MutationObserver(()=>markSec()).observe(bs,{childList:true});
+  sortable(bs,[
+    {k:"sector",label:"Sector",left:1,fmt:v=>`<button class="secbtn" data-sec="${esc(v)}"><i class="dot" style="background:${col(v)}"></i>${v}</button>`},
+    {k:"n",label:"Companies",fmt:v=>v.toLocaleString()},{k:"pc",label:"% of companies",fmt:v=>(100*v).toFixed(1)+"%"},
+    {k:"val",label:"Combined value",fmt:v=>fmt(v)},{k:"pv",label:"% of band value",fmt:v=>(100*v).toFixed(1)+"%"},
+    {k:"median",label:"Median",fmt:v=>fmt(v)}],sr,{k:"n",dir:-1});
+  bs.addEventListener("click",e=>{const b=e.target.closest(".secbtn");if(!b)return;const s=b.dataset.sec;state.sec=state.sec===s?"":s;document.getElementById("sf").value=state.sec;state.shown=100;rows();if(state.sec)document.getElementById("list").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"});});
+  V.querySelectorAll(".cos th button").forEach(b=>b.onclick=()=>{const k=+b.dataset.k;state.dir=state.k===k?-state.dir:(k===2?-1:1);state.k=k;V.querySelectorAll(".cos th button").forEach(x=>x.removeAttribute("data-dir"));b.dataset.dir=state.dir<0?"↓":"↑";rows();});
+  rows();
+  if(state.sec) setTimeout(()=>document.getElementById("list").scrollIntoView(),0);
+}
+function markSec(){document.querySelectorAll("#bsec .secbtn").forEach(b=>{const on=b.dataset.sec===state.sec;b.setAttribute("aria-pressed",on);b.closest("tr").classList.toggle("sel",on);});}
+function rows(){
+  const {d,q,sec,k,dir,shown}=state;
+  let r=d.cos.filter(c=>(!sec||c[3]===sec)&&(!q||c[0].toLowerCase().includes(q)||c[1].toLowerCase().includes(q)));
+  r=r.slice().sort((a,b)=>(a[k]<b[k]?-1:a[k]>b[k]?1:0)*dir);
+  document.getElementById("rows").innerHTML=r.slice(0,shown).map(c=>`<tr><td><b>${esc(c[0])}</b></td><td class="nm" title="${esc(c[1])}">${esc(c[1])}</td><td>${fmt(c[2])}</td><td class="sc" title="${esc(c[3])}"><i class="dot" style="background:${col(c[3])}"></i><span class="t">${esc(c[3])}</span></td><td class="sc ex">${c[4]}</td></tr>`).join("")||`<tr><td colspan="5" style="text-align:left;color:var(--muted)">No companies match. Clear the search or pick "All sectors".</td></tr>`;
+  markSec();
+  const ss=document.getElementById("secsum"), x=sec&&state.sr.find(z=>z.sector===sec);
+  ss.hidden=!x;
+  if(x){ss.innerHTML=`<div class="sh"><i class="dot" style="background:${col(sec)}"></i><span><b>${sec}</b> in ${d.band}</span><button class="clr" type="button">Show all sectors</button></div>
+   <div class="sg"><div><b>${x.n.toLocaleString()}</b>companies, ${(100*x.pc).toFixed(1)}% of the band</div><div><b>${fmt(x.val)}</b>combined value, ${(100*x.pv).toFixed(1)}% of the band's value</div><div><b>${fmt(x.median)}</b>median market cap</div></div>`;
+   ss.querySelector(".clr").onclick=()=>{state.sec="";document.getElementById("sf").value="";state.shown=100;rows();};}
+  document.getElementById("cnt").textContent=`Showing ${Math.min(shown,r.length).toLocaleString()} of ${r.length.toLocaleString()}`;
+  document.getElementById("more").hidden=r.length<=shown;
+}
+function route(){
+  const [id0,param]=decodeURIComponent((location.hash||"#home").slice(1)).split("/");
+  const d=D.find(x=>x.id===id0), id=d?id0:["sectors","overview","history","home"].includes(id0)?id0:"home";
+  J.value=id; document.body.classList.toggle("home",id==="home");
+  window.scrollTo(0,0);
+  if(d) band(d,param); else if(id==="sectors") sectorsView(param); else if(id==="overview") overview(); else if(id==="history") historyView(); else home(param);
+  document.title=(d?d.band+" companies":id==="sectors"?(param?param+" by market cap":"Sectors"):id==="overview"?"Overview":id==="history"?"5-year view":"US stocks by market cap")+" · 8 to 13";
+}
+addEventListener("hashchange",route);route();
+</script></body></html>
