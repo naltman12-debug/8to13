@@ -30,3 +30,27 @@ def band_stats(cos):
         caps=[c['mc'] for c in cos if lo<=c['mc']<hi]
         res.append(dict(id=bid,n=len(caps),median=statistics.median(caps) if caps else 0,total=sum(caps),share=sum(caps)/allv))
     return res,allv
+# Sector labels: Nasdaq switched to the current 11-sector scheme in 2022. Older snapshots are
+# mapped by ticker to the company's later label where known, otherwise by the closest old category.
+NEW_LABELS={'Technology','Health Care','Finance','Consumer Discretionary','Industrials','Real Estate','Energy','Utilities','Consumer Staples','Telecommunications','Basic Materials'}
+OLD2NEW={'Basic Industries':'Basic Materials','Capital Goods':'Industrials','Consumer Durables':'Consumer Discretionary','Consumer Non-Durables':'Consumer Staples','Consumer Services':'Consumer Discretionary','Public Utilities':'Utilities','Transportation':'Industrials'}
+def band_index(mc):
+    for i,(bid,name,lo,hi) in enumerate(BANDS):
+        if lo<=mc<hi: return i
+    return None
+def norm_sector(c,tmap=None):
+    s=c.get('sector') or ''
+    if c['sym'].startswith('BRK'): return 'Finance'
+    if s in NEW_LABELS: return s
+    if s in ('','Miscellaneous'):
+        return tmap.get(c['sym'],'Other') if tmap else 'Other'
+    if tmap and c['sym'] in tmap: return tmap[c['sym']]
+    return OLD2NEW.get(s,'Other')
+def sector_stats(cos,tmap=None):
+    out={}
+    for c in cos:
+        i=band_index(c['mc'])
+        if i is None: continue
+        r=out.setdefault(norm_sector(c,tmap),[0]*12)
+        r[i]+=1; r[6+i]+=c['mc']/1e6
+    return {s:r[:6]+[round(v) for v in r[6:]] for s,r in out.items()}
