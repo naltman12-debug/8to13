@@ -145,6 +145,23 @@ body.home header.bar{display:none}
 .ranges a[aria-selected="true"]{color:var(--bg);background:var(--bar)}
 .ranges a:focus-visible{outline:2px solid var(--bar);outline-offset:2px}
 .ranges .off{opacity:.38;cursor:not-allowed}
+.fbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 4px}
+.fwrap{position:relative}
+.fbtn{font:inherit;font-size:.88rem;font-weight:600;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink);cursor:pointer}
+.fbtn[aria-expanded="true"]{border-color:var(--bar)}
+.fpanel{position:absolute;z-index:20;top:calc(100% + 6px);left:0;width:min(420px,calc(100vw - 36px));background:var(--bg);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:14px}
+.fhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.fhead button{background:none;border:0;font:inherit;font-size:.82rem;color:var(--bar);cursor:pointer;padding:2px 0 2px 12px}
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px}
+.fgrid label{display:flex;align-items:center;gap:8px;font-size:.88rem;padding:6px 0;cursor:pointer}
+.fgrid input{width:17px;height:17px;accent-color:var(--bar);margin:0}
+.ffoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.ffoot button{font:inherit;font-size:.88rem;font-weight:600;padding:9px 16px;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.ffoot .apply{background:var(--bar);border-color:var(--bar);color:var(--bg)}
+.fbtn:focus-visible,.ffoot button:focus-visible,.fhead button:focus-visible,.fgrid input:focus-visible{outline:2px solid var(--bar);outline-offset:2px}
+.fchip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--soft);color:var(--ink);font-size:.82rem;text-decoration:none}
+.fclear{font-size:.82rem;color:var(--bar)}
+@media (max-width:480px){.fgrid{grid-template-columns:1fr}}
 
 .secbtn{display:inline-flex;align-items:center;gap:8px;background:none;border:0;padding:0;font:inherit;font-weight:600;color:var(--bar);cursor:pointer;text-align:left;white-space:nowrap}
 .secbtn:hover{text-decoration:underline}
@@ -191,7 +208,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const TOTAL=D.reduce((a,b)=>a+b.n,0);
 D.forEach((d,i)=>d.digits=13-i);
 document.getElementById("asof").textContent="Prices as of "+ASOF;
-const JUMP=[["home","Home"],["overview","Overview"],["sectors","Sectors"],["history","History"]].concat(D.map(d=>[d.id,d.band]));
+const JUMP=[["home","Home"],["overview","Overview"],["sectors","Sectors"],["history","Trends"]].concat(D.map(d=>[d.id,d.band]));
 const J=document.getElementById("jump");
 J.innerHTML=JUMP.map(([id,l])=>`<option value="${id}">${l}</option>`).join("");
 J.onchange=()=>{location.hash=J.value;};
@@ -269,7 +286,7 @@ function home(sel){
   <div class="hfilter"><label for="hs">Sector</label><select id="hs"><option value="">All sectors</option>${SECTORS.map(s=>`<option${s===sel?" selected":""}>${s}</option>`).join("")}</select></div>
   <div class="digits" id="hchart"></div>
   <p class="digcap" id="hcap"></p>
-  <div class="navs"><a href="#overview">Full overview</a><a href="#sectors">Sectors</a><a href="#history">History</a></div>
+  <div class="navs"><a href="#overview">Full overview</a><a href="#sectors">Sectors</a><a href="#history">Trends</a></div>
   <div class="facts">
    <div><b>${TOTAL.toLocaleString()}</b>US companies tracked</div>
    <div><b>${pct(t1.share)}</b>of the total value sits with the ${t1.n} companies worth $1T or more</div>
@@ -338,20 +355,46 @@ function lineChart(P,series,{max,ticks,fmtY}){
 }
 function spark(v,c){const W=240,Hh=46,mn=Math.min(...v),mx=Math.max(...v),r=mx-mn||1;
   return `<svg viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="${c}" stroke-width="2" vector-effect="non-scaling-stroke" points="${v.map((a,i)=>(W*i/Math.max(1,v.length-1))+","+(4+(Hh-8)*(1-(a-mn)/r))).join(" ")}"/></svg>`;}
-function historyView(r){
+function secSeries(P,sel){
+  if(!sel.length)return P;
+  return P.filter(p=>p.sec).map(p=>{const n=[0,0,0,0,0,0],v=[0,0,0,0,0,0];
+    sel.forEach(s=>{const r=p.sec[s];if(r)for(let i=0;i<6;i++){n[i]+=r[i];v[i]+=r[6+i];}});
+    const tot=v.reduce((a,b)=>a+b,0)||1;return{date:p.date,total:tot*1e3,n,share:v.map(x=>x/tot),median:[0,0,0,0,0,0]};});
+}
+function historyView(r,secq){
   if(!RANGES.some(x=>x[0]===r)||!rangeOK(r))r=rangeOK("5Y")?"5Y":"MAX";
-  const P=pickRange(r), f=P[0], l=P[P.length-1], first=HIST[0].date;
+  let sel=(secq||"").split(",").filter(s=>SECTORS.includes(s));
+  if(sel.length===SECTORS.length)sel=[];
+  const q=sel.length?"/"+encodeURIComponent(sel.join(",")):"";
+  const P=secSeries(pickRange(r),sel), first=HIST[0].date;
+  const label=sel.length?(sel.length<=3?sel.join(", "):sel.length+" sectors"):"All sectors";
+  const bar=`<div class="fbar">
+   <div class="fwrap"><button class="fbtn" id="fbtn" type="button" aria-expanded="false" aria-controls="fpanel">Sectors: ${label} \u25be</button>
+    <div class="fpanel" id="fpanel" hidden>
+     <div class="fhead"><b>Filter by sector</b><span><button type="button" id="fall">Select all</button><button type="button" id="fnone">Clear</button></span></div>
+     <div class="fgrid">${SECTORS.map(s=>`<label><input type="checkbox" value="${esc(s)}"${sel.includes(s)?" checked":""}><i class="dot" style="background:${col(s)}"></i>${s}</label>`).join("")}</div>
+     <div class="ffoot"><button type="button" id="fcancel">Cancel</button><button type="button" class="apply" id="fapply">Apply filter</button></div>
+    </div></div>
+   ${sel.map(s=>{const rest=sel.filter(x=>x!==s);return `<a class="fchip" href="#history/${r}${rest.length?"/"+encodeURIComponent(rest.join(",")):""}" aria-label="Remove ${esc(s)}"><i class="dot" style="background:${col(s)}"></i>${s} \u00d7</a>`;}).join("")}
+   ${sel.length?`<a class="fclear" href="#history/${r}">Clear filters</a>`:""}
+  </div>`;
+  const ranges=`<div class="ranges" role="tablist" aria-label="Time range">${RANGES.map(([k,lab])=>rangeOK(k)?`<a role="tab" href="#history/${k}${q}" aria-selected="${k===r}">${lab}</a>`:`<span class="off" title="History currently starts ${dlong(first)}">${lab}</span>`).join("")}</div>`;
+  if(P.length<2){
+    V.innerHTML=`<h1>Market cap trends</h1>${ranges}${bar}<p class="notes">Sector history for this range is still being filled in. It appears once the daily history update has run.</p>`;
+    wireFilter(r);return;
+  }
+  const f=P[0], l=P[P.length-1];
   const shareMax=Math.max(.1,Math.ceil(Math.max(...P.flatMap(p=>p.share))*10)/10);
-  V.innerHTML=`<h1>Market caps over time</h1>
-  <p class="sub">How the size and shape of the US market changed from ${dlong(f.date)} to ${dlong(l.date)}. Each point counts the companies that were listed on that date.</p>
-  <div class="ranges" role="tablist" aria-label="Time range">${RANGES.map(([k,lab])=>{const ok=rangeOK(k);return ok?`<a role="tab" href="#history/${k}" aria-selected="${k===r}">${lab}</a>`:`<span class="off" title="History currently starts ${dlong(first)}">${lab}</span>`;}).join("")}</div>
+  V.innerHTML=`<h1>Market cap trends</h1>
+  <p class="sub">How the size and shape of ${sel.length?"the selected sectors":"the US market"} changed from ${dlong(f.date)} to ${dlong(l.date)}. Each point counts the companies that were listed on that date.</p>
+  ${ranges}${bar}
   <div class="stats four">
    <div class="stat"><div class="v">${fmt(f.total)}</div><div class="k">Combined value, ${dmed(f.date)}</div></div>
    <div class="stat"><div class="v">${fmt(l.total)}</div><div class="k">Combined value, ${dmed(l.date)}</div></div>
    <div class="stat"><div class="v">${sgn(l.total/f.total-1,v=>(100*v).toFixed(1)+"%")}</div><div class="k">Change in combined value</div></div>
-   <div class="stat"><div class="v">${f.n.reduce((a,b)=>a+b,0).toLocaleString()} → ${l.n.reduce((a,b)=>a+b,0).toLocaleString()}</div><div class="k">Companies worth $10M or more</div></div>
+   <div class="stat"><div class="v">${f.n.reduce((a,b)=>a+b,0).toLocaleString()} \u2192 ${l.n.reduce((a,b)=>a+b,0).toLocaleString()}</div><div class="k">${sel.length?"Companies in the selected sectors":"Companies worth $10M or more"}</div></div>
   </div>
-  <h2>Share of total value by band</h2><p class="sub">Each line is one band's slice of the combined market value.${P.length<=400?" Hover or tap a point for the exact figure.":""}</p>
+  <h2>Share of total value by band</h2><p class="sub">Each line is one band's slice of ${sel.length?"the selected sectors' combined value":"the combined market value"}.${P.length<=400?" Hover or tap a point for the exact figure.":""}</p>
   ${lineChart(P,D.map((d,i)=>({name:d.band,c:BCOL[i],v:P.map(p=>p.share[i])})),{max:shareMax,ticks:[...Array(Math.round(shareMax*10)+1)].map((_,k)=>k/10),fmtY:v=>(100*v).toFixed(v<.01&&v>0?2:0)+"%"})}
   <div class="lgd">${D.map((d,i)=>`<span><i style="background:${BCOL[i]}"></i>${d.band}</span>`).join("")}</div>
   <h2>Companies in each band</h2><p class="sub">Number of companies in the band, ${dmed(f.date)} to ${dmed(l.date)}.</p>
@@ -359,7 +402,7 @@ function historyView(r){
   <h2>Then vs. now</h2><p class="sub">${dlong(f.date)} compared with ${dlong(l.date)}. Tap any column header to sort.</p>
   <div class="wrap"><table class="st" id="hcmp"></table></div>
   <div class="notes"><p>History currently starts ${dlong(first)}, so longer ranges are greyed out until older data is added. The site saves a new snapshot after every trading day.</p>
-  <p>Each snapshot uses the same rules as the rest of the site: US-based operating companies only, no SPACs, funds, preferred shares or foreign ADRs. Nasdaq changed its sector labels during this period, so sectors aren't compared over time.</p></div>`;
+  <p>Each snapshot uses the same rules as the rest of the site: US-based operating companies only, no SPACs, funds, preferred shares or foreign ADRs. Nasdaq switched to its current sector labels in 2022; for earlier dates each company is placed in the sector it was later given, or the closest older category if it delisted before the switch.${sel.length?" Median market caps aren't available when a sector filter is on.":""}</p></div>`;
   const rows=D.map((d,i)=>({band:d.band,id:d.id,ord:i,n0:f.n[i],n1:l.n[i],dn:f.n[i]?l.n[i]/f.n[i]-1:0,s0:f.share[i],s1:l.share[i],ds:l.share[i]-f.share[i],m0:f.median[i],m1:l.median[i]}));
   sortable(document.getElementById("hcmp"),[
     {k:"band",label:"Band",left:1,sort:r=>r.ord,fmt:(v,r)=>`<a href="#${r.id}">${v}</a>`},
@@ -367,7 +410,21 @@ function historyView(r){
     {k:"dn",label:"Change",fmt:v=>sgn(v,x=>(100*x).toFixed(0)+"%")},
     {k:"s0",label:"Share then",fmt:v=>pct(v)},{k:"s1",label:"Share now",fmt:v=>pct(v)},
     {k:"ds",label:"Change (pts)",fmt:v=>sgn(100*v,x=>x.toFixed(1))},
-    {k:"m0",label:"Median then",fmt:v=>fmt(v)},{k:"m1",label:"Median now",fmt:v=>fmt(v)}],rows,{k:"band",dir:1});
+    {k:"m0",label:"Median then",fmt:capOrDash},{k:"m1",label:"Median now",fmt:capOrDash}],rows,{k:"band",dir:1});
+  wireFilter(r);
+}
+function wireFilter(r){
+  const btn=document.getElementById("fbtn"),pan=document.getElementById("fpanel");
+  const boxes=()=>[...pan.querySelectorAll("input[type=checkbox]")];
+  const close=()=>{pan.hidden=true;btn.setAttribute("aria-expanded","false");document.removeEventListener("click",outside);document.removeEventListener("keydown",onKey);};
+  const outside=e=>{if(!e.target.closest(".fwrap"))close();};
+  const onKey=e=>{if(e.key==="Escape"){close();btn.focus();}};
+  btn.onclick=()=>{if(pan.hidden){pan.hidden=false;btn.setAttribute("aria-expanded","true");setTimeout(()=>{document.addEventListener("click",outside);document.addEventListener("keydown",onKey);},0);}else close();};
+  document.getElementById("fall").onclick=()=>boxes().forEach(b=>b.checked=true);
+  document.getElementById("fnone").onclick=()=>boxes().forEach(b=>b.checked=false);
+  document.getElementById("fcancel").onclick=close;
+  document.getElementById("fapply").onclick=()=>{const s=boxes().filter(b=>b.checked).map(b=>b.value);close();
+    location.hash="history/"+r+(s.length&&s.length<SECTORS.length?"/"+encodeURIComponent(s.join(",")):"");};
 }
 function overview(){
   const max=Math.max(...D.map(d=>d.n)), keys=new Set();D.forEach(d=>Object.keys(d.sectors).forEach(k=>keys.add(k)));
@@ -461,13 +518,13 @@ function rows(){
   document.getElementById("more").hidden=r.length<=shown;
 }
 function route(){
-  const [id0,param]=decodeURIComponent((location.hash||"#home").slice(1)).split("/");
+  const [id0,param,param2]=decodeURIComponent((location.hash||"#home").slice(1)).split("/");
   const d=D.find(x=>x.id===id0), id=d?id0:["sectors","overview","history","home"].includes(id0)?id0:"home";
   J.value=id; document.body.classList.toggle("home",id==="home");
   window.scrollTo(0,0);
-  if(d) band(d,param); else if(id==="sectors") sectorsView(param); else if(id==="overview") overview(); else if(id==="history") historyView(param); else home(param);
+  if(d) band(d,param); else if(id==="sectors") sectorsView(param); else if(id==="overview") overview(); else if(id==="history") historyView(param,param2); else home(param);
   placeAds(id);
-  document.title=(d?d.band+" companies":id==="sectors"?(param?param+" by market cap":"Sectors"):id==="overview"?"Overview":id==="history"?"Market caps over time":"US stocks by market cap")+" · 8 to 13";
+  document.title=(d?d.band+" companies":id==="sectors"?(param?param+" by market cap":"Sectors"):id==="overview"?"Overview":id==="history"?"Market cap trends":"US stocks by market cap")+" · 8 to 13";
 }
 // Ads: small reserved slots, no pop-ups. Nothing shows until an ad client ID is filled in.
 const ADS={client:"",slots:{top:"",home:"",rail:""},preview:false};
