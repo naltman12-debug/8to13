@@ -92,7 +92,7 @@ def main():
     hist.sort(key=lambda h: h["date"])
     hist_path.write_text(json.dumps(hist, separators=(",", ":")))
 
-    payload = dict(bands=bands_payload(cos), hist=chart_points(hist, day),
+    payload = dict(bands=bands_payload(cos), hist=hist,   # every stored snapshot; the page picks the range
                    asof=f"{day.strftime('%B')} {day.day}, {day.year}, 4:00 PM ET")
     html = (ROOT / "template.html").read_text().replace("__DATA__", json.dumps(payload, separators=(",", ":")))
     site = ROOT / "site"
