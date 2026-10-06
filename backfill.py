@@ -13,7 +13,7 @@ subprocess.run(["git", "clone", "-q", "--filter=blob:none", "--no-checkout", SOU
 log = subprocess.run(["git", "-C", str(tmp), "log", "--format=%H %cI", "--", "nyse/nyse_full_tickers.json"],
                      capture_output=True, text=True, check=True).stdout.split("\n")
 today = dt.date.today()
-cutoff = today.replace(year=today.year - WINDOW_YEARS - 1)
+cutoff = dt.date(1990, 1, 1)   # keep everything the source has
 by_day = {}
 for line in log:
     if not line.strip():
