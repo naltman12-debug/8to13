@@ -9,7 +9,7 @@ Run:  python build.py
 """
 import json, re, statistics, collections, subprocess, tempfile, datetime as dt, pathlib, shutil
 from zoneinfo import ZoneInfo
-from pipeline import companies, band_stats, BANDS
+from pipeline import companies, band_stats, BANDS, sector_stats
 
 ROOT = pathlib.Path(__file__).parent
 SOURCE_REPO = "https://github.com/rreichel3/US-Stock-Symbols.git"   # replace with a licensed source before running ads
@@ -55,10 +55,32 @@ def bands_payload(cos):
                               x["ex"].upper().replace("AMEX", "NYSE AMER")] for x in b]))
     return out
 
-def snapshot(cos, day):
+def snapshot(cos, day, tmap=None):
     bs, allv = band_stats(cos)
     return dict(date=day.isoformat(), total=round(allv / 1e6), n=[b["n"] for b in bs],
-                share=[round(b["share"], 4) for b in bs], median=[round(b["median"] / 1e6, 1) for b in bs])
+                share=[round(b["share"], 4) for b in bs], median=[round(b["median"] / 1e6, 1) for b in bs],
+                sec=sector_stats(cos, tmap))
+
+def page_points(hist):
+    """Daily points for the last 100 days, one per week before that. Sector values go out in $B."""
+    hist = sorted(hist, key=lambda h: h["date"])
+    if not hist:
+        return []
+    recent = (dt.date.fromisoformat(hist[-1]["date"]) - dt.timedelta(days=100)).isoformat()
+    weekly = {}
+    for h in hist:
+        if h["date"] < recent:
+            weekly[dt.date.fromisoformat(h["date"]).isocalendar()[:2]] = h
+    pts = sorted(weekly.values(), key=lambda h: h["date"]) + [h for h in hist if h["date"] >= recent]
+    if pts[0] is not hist[0]:
+        pts = [hist[0]] + pts
+    out = []
+    for h in pts:
+        p = {k: h[k] for k in ("date", "total", "n", "share", "median")}
+        if "sec" in h:
+            p["sec"] = {s: r[:6] + [round(v / 1e3, 2) for v in r[6:]] for s, r in h["sec"].items()}
+        out.append(p)
+    return out
 
 def chart_points(hist, today):
     """Keep the last five years: one point per month, plus the first and latest snapshot."""
@@ -92,7 +114,7 @@ def main():
     hist.sort(key=lambda h: h["date"])
     hist_path.write_text(json.dumps(hist, separators=(",", ":")))
 
-    payload = dict(bands=bands_payload(cos), hist=hist,   # every stored snapshot; the page picks the range
+    payload = dict(bands=bands_payload(cos), hist=page_points(hist),
                    asof=f"{day.strftime('%B')} {day.day}, {day.year}, 4:00 PM ET")
     html = (ROOT / "template.html").read_text().replace("__DATA__", json.dumps(payload, separators=(",", ":")))
     site = ROOT / "site"
